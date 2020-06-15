@@ -5,6 +5,11 @@
         prism:ViewModelLocator.AutoWireViewModel="True"
         Title="{Binding Title}" Height="350" Width="525" >
     <Grid>
-        <ContentControl prism:RegionManager.RegionName="ContentRegion" />
+        <!-- 今はまだ使わない？
+        <ContentControl prism:RegionManager.RegionName="ContentRegion" >
+        </ContentControl>
+        -->
+        <Button Content="種族・職業・性格・魔法領域を表示" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Top" Command="{Binding DisplayName}" FontSize="20"/>
+        <Label Content="{Binding Name.Value}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,90,0,0" VerticalAlignment="Top" Width="320" FontSize="20"/>
     </Grid>
 </Window>

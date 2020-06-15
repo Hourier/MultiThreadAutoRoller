@@ -1,5 +1,6 @@
 ﻿using Prism.Ioc;
 using DiceRollExperiment.Views;
+using DiceRollExperimentModel;
 using System.Windows;
 
 namespace DiceRollExperiment
@@ -9,14 +10,8 @@ namespace DiceRollExperiment
     /// </summary>
     public partial class App
     {
-        protected override Window CreateShell()
-        {
-            return Container.Resolve<MainWindow>();
-        }
+        protected override Window CreateShell() => this.Container.Resolve<MainWindow>();
 
-        protected override void RegisterTypes(IContainerRegistry containerRegistry)
-        {
-
-        }
+        protected override void RegisterTypes(IContainerRegistry containerRegistry) => containerRegistry.Register<IDiceRoller, DiceRoller>();
     }
 }

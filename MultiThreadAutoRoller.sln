@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiceRollExperiment", "DiceRollExperiment\DiceRollExperiment.csproj", "{A5316F4B-7122-4A1C-99B7-8C92B08ED79C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiceRollExperimentModel", "DiceRollExperimentModel\DiceRollExperimentModel.csproj", "{544C3B45-E8BA-4F1D-A01A-2FCE88E9809E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiceRollExperimentModel", "DiceRollExperimentModel\DiceRollExperimentModel.csproj", "{544C3B45-E8BA-4F1D-A01A-2FCE88E9809E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{375BF927-A66D-4097-A3F3-FA28AE3BF8AE}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
