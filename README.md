@@ -1,7 +1,7 @@
 # MultiThreadAutoRoller
 Experimental tools from scratch for the birth auto roller of Hengband<br>
 <br>
-このプロジェクトでは、フリーでオープンソースなゲーム[変愚蛮怒](https://osdn.net/projects/hengband/)に関する実験的なツール置き場です<br>
+このプロジェクトは、フリーでオープンソースなゲーム[変愚蛮怒](https://osdn.net/projects/hengband/)に関する実験的なツール置き場です<br>
 変愚蛮怒そのものではなく、またそのソースコードは含まれておりません<br>
 <br>
 本ツールの目的は、キャラビルドの際に発生するダイスロールが見た目以上に長時間かかる事象の解決です<br>
