@@ -1,0 +1,23 @@
+﻿<Window x:Class="DiceRollExperiment.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        Title="{Binding Title}" Height="350" Width="525" >
+    <Grid>
+        <!-- 今はまだ使わない？
+        <ContentControl prism:RegionManager.RegionName="ContentRegion" >
+        </ContentControl>
+        -->
+        <Button Content="種族・職業・性格・魔法領域を表示" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Top" Command="{Binding DisplayName}" FontSize="20"/>
+        <Label Content="{Binding Name.Value}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,90,0,0" VerticalAlignment="Top" Width="320" FontSize="20"/>
+
+        <Button Content="疑似ダイスロール" HorizontalAlignment="Center" Margin="0,140,0,0" VerticalAlignment="Top" Command="{Binding DiceRollCommand}" FontSize="20"/>
+        <Label Content="Count" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-300,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Label Content="Result" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Label Content="Elapsed time" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="300,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" Margin="-300,250,0,0" Text="{Binding DiceRollCount.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" Margin="0,250,0,0" Text="{Binding DiceRollResult.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" Margin="300,250,0,0" Text="{Binding ElapsedTime.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+    </Grid>
+</Window>
