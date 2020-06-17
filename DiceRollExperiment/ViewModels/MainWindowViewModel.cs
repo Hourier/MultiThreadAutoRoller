@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Unity;
 
@@ -20,6 +21,7 @@ namespace DiceRollExperiment.ViewModels
         private readonly PlayerRace playerRace = new PlayerRace();
         private readonly PlayerPersonality playerPersonality = new PlayerPersonality();
         private readonly PlayerClass playerClass = new PlayerClass();
+        private readonly PlayerRealm playerRealm = new PlayerRealm();
         private bool isButtonPushedFirst;
         private CompositeDisposable disposable = new CompositeDisposable();
 
@@ -39,6 +41,7 @@ namespace DiceRollExperiment.ViewModels
             this.SelectedPlayerPersonality.Subscribe(x => this.UpdatePersonality(x));
             this.ClassesComboBox = this.playerClass.ClassMap;
             this.SelectedPlayerClass.Subscribe(x => this.UpdateClass(x));
+            this.UpdateRealm();
         }
 
         public string Title
@@ -58,8 +61,11 @@ namespace DiceRollExperiment.ViewModels
         // まだ男女でセクシーギャル/ラッキーマンを除外する機能は持っていない.
         public IReadOnlyDictionary<PersonalityType, string> PersonalitiesComboBox { get; set; }
 
-        // 魔法領域については未実装.
         public IReadOnlyDictionary<ClassType, string> ClassesComboBox { get; set; }
+
+        public ReactiveProperty<IReadOnlyDictionary<RealmType, string>> FirstRealmsComboBox { get; set; } = new ReactiveProperty<IReadOnlyDictionary<RealmType, string>>();
+
+        public ReactiveProperty<IReadOnlyDictionary<RealmType, string>> SecondRealmsComboBox { get; set; } = new ReactiveProperty<IReadOnlyDictionary<RealmType, string>>();
 
         // 本当はenumとの相互変換をしたいが、Prism7.2+ReactivePropertyのXAML環境下で適切に動作するConverterをどうしても作り込めなかった.
         public ReactiveProperty<string> SelectedPlayerSex { get; } = new ReactiveProperty<string>(((int)SexType.Female).ToString());
@@ -70,6 +76,12 @@ namespace DiceRollExperiment.ViewModels
 
         // ふさわしい職業かどうかを調べる機能は未実装.
         public ReactiveProperty<string> SelectedPlayerClass { get; } = new ReactiveProperty<string>(((int)ClassType.Warrior).ToString());
+
+        public ReactiveProperty<bool> HasFirstRealm { get; } = new ReactiveProperty<bool>();
+
+        public ReactiveProperty<bool> HasSecondRealm { get; } = new ReactiveProperty<bool>();
+
+        public ReactiveProperty<string> SelectedPlayerRealmFirst { get; } = new ReactiveProperty<string>();
 
         public ReactiveProperty<string> PlayerDescriptionLabel { get; } = new ReactiveProperty<string>();
 
@@ -90,6 +102,11 @@ namespace DiceRollExperiment.ViewModels
             this.disposable.Add(this.SelectedPlayerRace);
             this.disposable.Add(this.SelectedPlayerPersonality);
             this.disposable.Add(this.SelectedPlayerClass);
+            this.disposable.Add(this.FirstRealmsComboBox);
+            this.disposable.Add(this.SecondRealmsComboBox);
+            this.disposable.Add(this.HasFirstRealm);
+            this.disposable.Add(this.HasSecondRealm);
+            this.disposable.Add(this.SelectedPlayerRealmFirst);
             this.disposable.Add(this.PlayerDescriptionLabel);
             this.disposable.Add(this.DisplayDescription);
             this.disposable.Add(this.DiceRollCommand);
@@ -131,8 +148,17 @@ namespace DiceRollExperiment.ViewModels
             var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
             var classType = this.playerClass.GetPlayerClass(x);
             this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
+            this.UpdateRealm();
         }
 
+        private void UpdateRealm()
+        {
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            this.HasFirstRealm.Value = this.playerRealm.HasFirstRealm(classType);
+            this.FirstRealmsComboBox.Value = this.playerRealm.GetRealm(classType, true);
+            this.HasSecondRealm.Value = this.playerRealm.HasSecondRealm(classType);
+            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealm(classType, false);
+        }
 
         private void ExecuteDiceRoll()
         {

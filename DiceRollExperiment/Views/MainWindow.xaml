@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        Title="{Binding Title}" Height="350" Width="650" >
+        Title="{Binding Title}" Height="400" Width="650" >
     <Grid>
         <ComboBox HorizontalAlignment="Center" Margin="-450,50,0,0" VerticalAlignment="Top" Width="120"
                   ItemsSource="{Binding RacesComboBox}" SelectedItem="{Binding RaceComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerRace.Value}"
                   Validation.ErrorTemplate="{x:Null}" FontSize="16"/>
         <ComboBox HorizontalAlignment="Center" Margin="-150,50,0,0" VerticalAlignment="Top" Width="120"
-                  ItemsSource="{Binding SexesComboBox}" SelectedItem="{Binding SexeComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerSex.Value}"
+                  ItemsSource="{Binding SexesComboBox}" SelectedItem="{Binding SexesComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerSex.Value}"
                   Validation.ErrorTemplate="{x:Null}" FontSize="16"/>
         <ComboBox HorizontalAlignment="Center" Margin="150,50,0,0" VerticalAlignment="Top" Width="120"
                   ItemsSource="{Binding PersonalitiesComboBox}" SelectedItem="{Binding PersonalitiesComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerPersonality.Value}"
@@ -17,14 +17,20 @@
         <ComboBox HorizontalAlignment="Center" Margin="450,50,0,0" VerticalAlignment="Top" Width="120"
                   ItemsSource="{Binding ClassesComboBox}" SelectedItem="{Binding ClassesComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerClass.Value}"
                   Validation.ErrorTemplate="{x:Null}" FontSize="16"/>
-        <Label Content="{Binding PlayerDescriptionLabel.Value}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,100,0,0" VerticalAlignment="Top" Width="500" FontSize="20"/>
+        <ComboBox HorizontalAlignment="Center" Margin="-450,100,0,0" VerticalAlignment="Top" Width="120"
+                  ItemsSource="{Binding FirstRealmsComboBox.Value}" SelectedItem="{Binding FirstRealmsComboBox.Value, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerRealmFirst.Value}"
+                  Validation.ErrorTemplate="{x:Null}" FontSize="16" IsEnabled="{Binding HasFirstRealm.Value}"/>
+        <ComboBox HorizontalAlignment="Center" Margin="-150,100,0,0" VerticalAlignment="Top" Width="120"
+                  ItemsSource="{Binding SecondRealmsComboBox.Value}" SelectedItem="{Binding SecondRealmsComboBox.Value, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value"
+                  Validation.ErrorTemplate="{x:Null}" FontSize="16" IsEnabled="{Binding HasSecondRealm.Value}"/>
+        <Label Content="{Binding PlayerDescriptionLabel.Value}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,150,0,0" VerticalAlignment="Top" Width="500" FontSize="20"/>
 
-        <Button Content="疑似ダイスロール" HorizontalAlignment="Center" Margin="0,150,0,0" VerticalAlignment="Top" Command="{Binding DiceRollCommand}" FontSize="16"/>
-        <Label Content="Count" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-450,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <Label Content="Result" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-150,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <Label Content="Elapsed time" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="150,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="-450,250,0,0" Text="{Binding DiceRollCount.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="-150,250,0,0" Text="{Binding DiceRollResult.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="150,250,0,0" Text="{Binding ElapsedTime.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Button Content="疑似ダイスロール" HorizontalAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top" Command="{Binding DiceRollCommand}" FontSize="16"/>
+        <Label Content="Count" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-450,250,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Label Content="Result" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-150,250,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Label Content="Elapsed time" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="150,250,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="-450,300,0,0" Text="{Binding DiceRollCount.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="-150,300,0,0" Text="{Binding DiceRollResult.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="150,300,0,0" Text="{Binding ElapsedTime.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
     </Grid>
 </Window>

@@ -186,6 +186,20 @@ namespace DiceRollExperimentModel
             }
         }
 
+        public bool IsFirstRealmFixed(ClassType playerClass)
+        {
+            switch(playerClass)
+            {
+                case ClassType.Ranger:
+                case ClassType.WarriorMage:
+                case ClassType.Tourist:
+                case ClassType.BeastMaster:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public bool HasSecondRealm(ClassType playerClass)
         {
             switch (playerClass)
@@ -200,7 +214,7 @@ namespace DiceRollExperimentModel
             }
         }
 
-        public IReadOnlyDictionary<RealmType, string> GetRealm(ClassType playerClass, bool isFirstRealm)
+        public IReadOnlyDictionary<RealmType, string> GetRealm(ClassType playerClass, bool isFirstRealm, RealmType realmType = RealmType.None)
         {
             return playerClass switch
             {
