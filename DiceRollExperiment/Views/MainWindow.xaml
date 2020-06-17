@@ -8,6 +8,9 @@
         <ComboBox HorizontalAlignment="Center" Margin="-450,50,0,0" VerticalAlignment="Top" Width="120"
                   ItemsSource="{Binding RacesComboBox}" SelectedItem="{Binding RaceComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerRace.Value}"
                   Validation.ErrorTemplate="{x:Null}" FontSize="16"/>
+        <ComboBox HorizontalAlignment="Center" Margin="-150,50,0,0" VerticalAlignment="Top" Width="120"
+                  ItemsSource="{Binding SexesComboBox}" SelectedItem="{Binding SexeComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerSex.Value}"
+                  Validation.ErrorTemplate="{x:Null}" FontSize="16"/>
         <ComboBox HorizontalAlignment="Center" Margin="150,50,0,0" VerticalAlignment="Top" Width="120"
                   ItemsSource="{Binding PersonalitiesComboBox}" SelectedItem="{Binding PersonalitiesComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerPersonality.Value}"
                   Validation.ErrorTemplate="{x:Null}" FontSize="16"/>

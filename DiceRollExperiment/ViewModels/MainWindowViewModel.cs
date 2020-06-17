@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
-using System.Windows;
 using Unity;
 
 namespace DiceRollExperiment.ViewModels
@@ -17,6 +16,7 @@ namespace DiceRollExperiment.ViewModels
         private string title = "Dice Roll Experiment";
         private readonly IEventAggregator eventAggregator; // TODO: まだ使わない、不必要であることが確定したら消す.
         private readonly PlayerDescription playerDescription;
+        private readonly PlayerSex playerSex = new PlayerSex();
         private readonly PlayerRace playerRace = new PlayerRace();
         private readonly PlayerPersonality playerPersonality = new PlayerPersonality();
         private readonly PlayerClass playerClass = new PlayerClass();
@@ -30,7 +30,9 @@ namespace DiceRollExperiment.ViewModels
             this.PlayerDescriptionLabel.Value = "あなたは……";
             this.DiceRollCommand.Subscribe(() => this.ExecuteDiceRoll());
 
-            this.playerDescription = new PlayerDescription(this.playerRace, this.playerPersonality, this.playerClass);
+            this.playerDescription = new PlayerDescription(this.playerSex, this.playerRace, this.playerPersonality, this.playerClass);
+            this.SexesComboBox = this.playerSex.SexMap;
+            this.SelectedPlayerSex.Subscribe(x => this.UpdateSex(x));
             this.RacesComboBox = this.playerRace.RaceMap;
             this.SelectedPlayerRace.Subscribe(x => this.UpdateRace(x));
             this.PersonalitiesComboBox = this.playerPersonality.PersonalityMap;
@@ -49,6 +51,8 @@ namespace DiceRollExperiment.ViewModels
         [Dependency]
         public IDiceRoller DiceRoller { get; set; }
 
+        public IReadOnlyDictionary<SexType, string> SexesComboBox { get; set; }
+
         public IReadOnlyDictionary<RaceType, string> RacesComboBox { get; set; }
 
         // まだ男女でセクシーギャル/ラッキーマンを除外する機能は持っていない.
@@ -58,10 +62,13 @@ namespace DiceRollExperiment.ViewModels
         public IReadOnlyDictionary<ClassType, string> ClassesComboBox { get; set; }
 
         // 本当はenumとの相互変換をしたいが、Prism7.2+ReactivePropertyのXAML環境下で適切に動作するConverterをどうしても作り込めなかった.
+        public ReactiveProperty<string> SelectedPlayerSex { get; } = new ReactiveProperty<string>(((int)SexType.Female).ToString());
+
         public ReactiveProperty<string> SelectedPlayerRace { get; } = new ReactiveProperty<string>(((int)RaceType.Human).ToString());
 
         public ReactiveProperty<string> SelectedPlayerPersonality { get; } = new ReactiveProperty<string>(((int)PersonalityType.Ordinary).ToString());
 
+        // ふさわしい職業かどうかを調べる機能は未実装.
         public ReactiveProperty<string> SelectedPlayerClass { get; } = new ReactiveProperty<string>(((int)ClassType.Warrior).ToString());
 
         public ReactiveProperty<string> PlayerDescriptionLabel { get; } = new ReactiveProperty<string>();
@@ -90,28 +97,40 @@ namespace DiceRollExperiment.ViewModels
             this.disposable.Add(this.ElapsedTime);
         }
 
-        private void UpdateRace(string x)
+        private void UpdateSex(string x)
         {
+            var sexType = this.playerSex.GetPlayerSex(x);
             var raceType = this.playerRace.GetPlayerRace(x);
             var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
             var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
-            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(raceType, personalityType, classType);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
+        }
+
+        private void UpdateRace(string x)
+        {
+            var sexType = this.playerSex.GetPlayerSex(this.SelectedPlayerSex.Value);
+            var raceType = this.playerRace.GetPlayerRace(x);
+            var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
         }
 
         private void UpdatePersonality(string x)
         {
+            var sexType = this.playerSex.GetPlayerSex(this.SelectedPlayerSex.Value);
             var raceType = this.playerRace.GetPlayerRace(this.SelectedPlayerRace.Value);
             var personalityType = this.playerPersonality.GetPlayerPersonality(x);
             var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
-            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(raceType, personalityType, classType);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
         }
 
         private void UpdateClass(string x)
         {
+            var sexType = this.playerSex.GetPlayerSex(this.SelectedPlayerSex.Value);
             var raceType = this.playerRace.GetPlayerRace(this.SelectedPlayerRace.Value);
             var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
             var classType = this.playerClass.GetPlayerClass(x);
-            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(raceType, personalityType, classType);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
         }
 
 
