@@ -3,9 +3,11 @@ using Prism.Events;
 using Prism.Mvvm;
 using Reactive.Bindings;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reactive.Disposables;
 using System.Threading.Tasks;
+using System.Windows;
 using Unity;
 
 namespace DiceRollExperiment.ViewModels
@@ -14,8 +16,22 @@ namespace DiceRollExperiment.ViewModels
     {
         private string title = "Dice Roll Experiment";
         private readonly IEventAggregator eventAggregator; // TODO: まだ使わない、不必要であることが確定したら消す.
+        private readonly PlayerDescription playerDescription;
         private bool isButtonPushedFirst;
         private CompositeDisposable disposable = new CompositeDisposable();
+
+        public MainWindowViewModel(IEventAggregator eventAggregator)
+        {
+            this.eventAggregator = eventAggregator;
+            this.AddCompositeDisposable();
+            this.PlayerDescriptionLabel.Value = "あなたは……";
+            this.DiceRollCommand.Subscribe(() => this.ExecuteDiceRoll());
+
+            var playerPersonality = new PlayerPersonality();
+            this.playerDescription = new PlayerDescription(playerPersonality);
+            this.PersonalitiesComboBox = playerPersonality.PersonalityMap;
+            this.SelectedPlayerPersonality.Subscribe(x => this.UpdatePersonality(x));
+        }
 
         public string Title
         {
@@ -27,9 +43,15 @@ namespace DiceRollExperiment.ViewModels
         [Dependency]
         public IDiceRoller DiceRoller { get; set; }
 
-        public ReactiveProperty<string> Name { get; } = new ReactiveProperty<string>();
+        // まだ男女でセクシーギャル/ラッキーマンを除外する機能は持っていない.
+        public IReadOnlyDictionary<PersonalityType, string> PersonalitiesComboBox { get; set; }
 
-        public ReactiveCommand DisplayName { get; } = new ReactiveCommand();
+        // 本当はenumとの相互変換をしたいが、Prism7.2+ReactivePropertyのXAML環境下で適切に動作するConverterをどうしても作り込めなかった.
+        public ReactiveProperty<string> SelectedPlayerPersonality { get; } = new ReactiveProperty<string>(((int)PersonalityType.Ordinary).ToString());
+
+        public ReactiveProperty<string> PlayerDescriptionLabel { get; } = new ReactiveProperty<string>();
+
+        public ReactiveCommand DisplayDescription { get; } = new ReactiveCommand();
 
         public ReactiveCommand DiceRollCommand { get; } = new ReactiveCommand();
 
@@ -39,19 +61,34 @@ namespace DiceRollExperiment.ViewModels
 
         public ReactiveProperty<string> ElapsedTime { get; } = new ReactiveProperty<string>();
 
-        public MainWindowViewModel(IEventAggregator eventAggregator)
-        {
-            this.eventAggregator = eventAggregator;
-            this.disposable.Add(this.DisplayName);
-            this.disposable.Add(this.DiceRollCommand);
-            this.Name.Value = "あなたは……";
-            this.DisplayName.Subscribe(() => this.UpdateName());
-            this.DiceRollCommand.Subscribe(() => this.ExecuteDiceRoll());
-        }
-
         public void Dispose() => this.disposable.Dispose();
 
-        private void UpdateName() => this.Name.Value = this.DiceRoller.GetName();
+        public void AddCompositeDisposable()
+        {
+            this.disposable.Add(this.SelectedPlayerPersonality);
+            this.disposable.Add(this.PlayerDescriptionLabel);
+            this.disposable.Add(this.DisplayDescription);
+            this.disposable.Add(this.DiceRollCommand);
+            this.disposable.Add(this.DiceRollCount);
+            this.disposable.Add(this.ElapsedTime);
+        }
+
+        private void UpdatePersonality(string x)
+        {
+            if (!int.TryParse(x, out var intValue))
+            {
+                MessageBox.Show("Invalid value!");
+                return;
+            }
+
+            if (!Enum.IsDefined(typeof(PersonalityType), intValue))
+            {
+                MessageBox.Show("Undefined value!");
+                return;
+            }
+
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription((PersonalityType)intValue);
+        }
 
         private void ExecuteDiceRoll()
         {

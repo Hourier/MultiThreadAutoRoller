@@ -11,9 +11,6 @@ namespace DiceRollExperimentModel
 
         public TimeSpan ElapsedTime { get; }
 
-
         public void StartRoll();
-
-        public string GetName();
     }
 }

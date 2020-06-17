@@ -3,21 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        Title="{Binding Title}" Height="350" Width="525" >
+        Title="{Binding Title}" Height="350" Width="650" >
     <Grid>
-        <!-- 今はまだ使わない？
-        <ContentControl prism:RegionManager.RegionName="ContentRegion" >
-        </ContentControl>
-        -->
-        <Button Content="種族・職業・性格・魔法領域を表示" HorizontalAlignment="Center" Margin="0,40,0,0" VerticalAlignment="Top" Command="{Binding DisplayName}" FontSize="20"/>
-        <Label Content="{Binding Name.Value}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,90,0,0" VerticalAlignment="Top" Width="320" FontSize="20"/>
+        <ComboBox HorizontalAlignment="Center" Margin="150,50,0,0" VerticalAlignment="Top" Width="120"
+                  ItemsSource="{Binding PersonalitiesComboBox}" SelectedItem="{Binding Personalities, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerPersonality.Value}"
+                  Validation.ErrorTemplate="{x:Null}" FontSize="16"/>
+        <Label Content="{Binding PlayerDescriptionLabel.Value}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,100,0,0" VerticalAlignment="Top" Width="500" FontSize="20"/>
 
-        <Button Content="疑似ダイスロール" HorizontalAlignment="Center" Margin="0,140,0,0" VerticalAlignment="Top" Command="{Binding DiceRollCommand}" FontSize="20"/>
-        <Label Content="Count" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-300,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <Label Content="Result" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <Label Content="Elapsed time" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="300,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <TextBlock HorizontalAlignment="Center" Margin="-300,250,0,0" Text="{Binding DiceRollCount.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <TextBlock HorizontalAlignment="Center" Margin="0,250,0,0" Text="{Binding DiceRollResult.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
-        <TextBlock HorizontalAlignment="Center" Margin="300,250,0,0" Text="{Binding ElapsedTime.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Button Content="疑似ダイスロール" HorizontalAlignment="Center" Margin="0,150,0,0" VerticalAlignment="Top" Command="{Binding DiceRollCommand}" FontSize="16"/>
+        <Label Content="Count" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-450,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Label Content="Result" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-150,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Label Content="Elapsed time" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="150,200,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="-450,250,0,0" Text="{Binding DiceRollCount.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="-150,250,0,0" Text="{Binding DiceRollResult.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="150,250,0,0" Text="{Binding ElapsedTime.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
     </Grid>
 </Window>
