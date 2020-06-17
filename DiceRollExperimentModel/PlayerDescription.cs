@@ -6,10 +6,15 @@ namespace DiceRollExperimentModel
     public class PlayerDescription
     {
         private readonly IReadOnlyDictionary<PersonalityType, string> personalityMap;
+        private readonly IReadOnlyDictionary<ClassType, string> classMap;
 
-        public PlayerDescription(PlayerPersonality playerPersonality) => this.personalityMap = playerPersonality.PersonalityMap;
+        public PlayerDescription(PlayerPersonality playerPersonality, PlayerClass playerClass)
+        {
+            this.personalityMap = playerPersonality.PersonalityMap;
+            this.classMap = playerClass.ClassMap;
+        }
 
-        public string GetDescription(PersonalityType personalityType)
+        public string GetDescription(PersonalityType personalityType, ClassType classType)
         {
             var builder = new StringBuilder();
             builder.Append("あなたは");
@@ -23,7 +28,7 @@ namespace DiceRollExperimentModel
                 builder.Append("の");
             }
 
-            builder.Append("戦士"); // TODO: 後で変数化する.
+            builder.Append(this.classMap[classType]);
             builder.Append("です");
             return builder.ToString();
         }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using DiceRollExperimentModel.Properties;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace DiceRollExperimentModel
@@ -56,5 +58,20 @@ namespace DiceRollExperimentModel
         }
 
         public IReadOnlyDictionary<PersonalityType, string> PersonalityMap => this.personalityMap;
+
+        public PersonalityType GetPlayerPersonality(string value)
+        {
+            if (!int.TryParse(value, out var personalityValue))
+            {
+                throw new ArgumentException(Resources.M_InvalidValue);
+            }
+
+            if (!Enum.IsDefined(typeof(PersonalityType), personalityValue))
+            {
+                throw new ArgumentException(Resources.M_UndefinedValue);
+            }
+
+            return (PersonalityType)personalityValue;
+        }
     }
 }

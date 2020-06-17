@@ -17,6 +17,8 @@ namespace DiceRollExperiment.ViewModels
         private string title = "Dice Roll Experiment";
         private readonly IEventAggregator eventAggregator; // TODO: まだ使わない、不必要であることが確定したら消す.
         private readonly PlayerDescription playerDescription;
+        private readonly PlayerPersonality playerPersonality = new PlayerPersonality();
+        private readonly PlayerClass playerClass = new PlayerClass();
         private bool isButtonPushedFirst;
         private CompositeDisposable disposable = new CompositeDisposable();
 
@@ -27,10 +29,11 @@ namespace DiceRollExperiment.ViewModels
             this.PlayerDescriptionLabel.Value = "あなたは……";
             this.DiceRollCommand.Subscribe(() => this.ExecuteDiceRoll());
 
-            var playerPersonality = new PlayerPersonality();
-            this.playerDescription = new PlayerDescription(playerPersonality);
-            this.PersonalitiesComboBox = playerPersonality.PersonalityMap;
+            this.playerDescription = new PlayerDescription(this.playerPersonality, this.playerClass);
+            this.PersonalitiesComboBox = this.playerPersonality.PersonalityMap;
             this.SelectedPlayerPersonality.Subscribe(x => this.UpdatePersonality(x));
+            this.ClassesComboBox = this.playerClass.ClassMap;
+            this.SelectedPlayerClass.Subscribe(x => this.UpdateClass(x));
         }
 
         public string Title
@@ -46,8 +49,12 @@ namespace DiceRollExperiment.ViewModels
         // まだ男女でセクシーギャル/ラッキーマンを除外する機能は持っていない.
         public IReadOnlyDictionary<PersonalityType, string> PersonalitiesComboBox { get; set; }
 
+        public IReadOnlyDictionary<ClassType, string> ClassesComboBox { get; set; }
+
         // 本当はenumとの相互変換をしたいが、Prism7.2+ReactivePropertyのXAML環境下で適切に動作するConverterをどうしても作り込めなかった.
         public ReactiveProperty<string> SelectedPlayerPersonality { get; } = new ReactiveProperty<string>(((int)PersonalityType.Ordinary).ToString());
+
+        public ReactiveProperty<string> SelectedPlayerClass { get; } = new ReactiveProperty<string>(((int)ClassType.Warrior).ToString());
 
         public ReactiveProperty<string> PlayerDescriptionLabel { get; } = new ReactiveProperty<string>();
 
@@ -66,6 +73,7 @@ namespace DiceRollExperiment.ViewModels
         public void AddCompositeDisposable()
         {
             this.disposable.Add(this.SelectedPlayerPersonality);
+            this.disposable.Add(this.SelectedPlayerClass);
             this.disposable.Add(this.PlayerDescriptionLabel);
             this.disposable.Add(this.DisplayDescription);
             this.disposable.Add(this.DiceRollCommand);
@@ -75,20 +83,18 @@ namespace DiceRollExperiment.ViewModels
 
         private void UpdatePersonality(string x)
         {
-            if (!int.TryParse(x, out var intValue))
-            {
-                MessageBox.Show("Invalid value!");
-                return;
-            }
-
-            if (!Enum.IsDefined(typeof(PersonalityType), intValue))
-            {
-                MessageBox.Show("Undefined value!");
-                return;
-            }
-
-            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription((PersonalityType)intValue);
+            var playerPersonality = this.playerPersonality.GetPlayerPersonality(x);
+            var playerClass = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(playerPersonality, playerClass);
         }
+
+        private void UpdateClass(string x)
+        {
+            var playerPersonality = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
+            var playerClass = this.playerClass.GetPlayerClass(x);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(playerPersonality, playerClass);
+        }
+
 
         private void ExecuteDiceRoll()
         {

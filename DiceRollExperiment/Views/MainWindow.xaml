@@ -6,7 +6,10 @@
         Title="{Binding Title}" Height="350" Width="650" >
     <Grid>
         <ComboBox HorizontalAlignment="Center" Margin="150,50,0,0" VerticalAlignment="Top" Width="120"
-                  ItemsSource="{Binding PersonalitiesComboBox}" SelectedItem="{Binding Personalities, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerPersonality.Value}"
+                  ItemsSource="{Binding PersonalitiesComboBox}" SelectedItem="{Binding PersonalitiesComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerPersonality.Value}"
+                  Validation.ErrorTemplate="{x:Null}" FontSize="16"/>
+        <ComboBox HorizontalAlignment="Center" Margin="450,50,0,0" VerticalAlignment="Top" Width="120"
+                  ItemsSource="{Binding ClassesComboBox}" SelectedItem="{Binding ClassesComboBox, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerClass.Value}"
                   Validation.ErrorTemplate="{x:Null}" FontSize="16"/>
         <Label Content="{Binding PlayerDescriptionLabel.Value}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,100,0,0" VerticalAlignment="Top" Width="500" FontSize="20"/>
 
