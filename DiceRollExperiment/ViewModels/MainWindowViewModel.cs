@@ -17,6 +17,7 @@ namespace DiceRollExperiment.ViewModels
         private string title = "Dice Roll Experiment";
         private readonly IEventAggregator eventAggregator; // TODO: まだ使わない、不必要であることが確定したら消す.
         private readonly PlayerDescription playerDescription;
+        private readonly PlayerRace playerRace = new PlayerRace();
         private readonly PlayerPersonality playerPersonality = new PlayerPersonality();
         private readonly PlayerClass playerClass = new PlayerClass();
         private bool isButtonPushedFirst;
@@ -29,7 +30,9 @@ namespace DiceRollExperiment.ViewModels
             this.PlayerDescriptionLabel.Value = "あなたは……";
             this.DiceRollCommand.Subscribe(() => this.ExecuteDiceRoll());
 
-            this.playerDescription = new PlayerDescription(this.playerPersonality, this.playerClass);
+            this.playerDescription = new PlayerDescription(this.playerRace, this.playerPersonality, this.playerClass);
+            this.RacesComboBox = this.playerRace.RaceMap;
+            this.SelectedPlayerRace.Subscribe(x => this.UpdateRace(x));
             this.PersonalitiesComboBox = this.playerPersonality.PersonalityMap;
             this.SelectedPlayerPersonality.Subscribe(x => this.UpdatePersonality(x));
             this.ClassesComboBox = this.playerClass.ClassMap;
@@ -46,12 +49,17 @@ namespace DiceRollExperiment.ViewModels
         [Dependency]
         public IDiceRoller DiceRoller { get; set; }
 
+        public IReadOnlyDictionary<RaceType, string> RacesComboBox { get; set; }
+
         // まだ男女でセクシーギャル/ラッキーマンを除外する機能は持っていない.
         public IReadOnlyDictionary<PersonalityType, string> PersonalitiesComboBox { get; set; }
 
+        // 魔法領域については未実装.
         public IReadOnlyDictionary<ClassType, string> ClassesComboBox { get; set; }
 
         // 本当はenumとの相互変換をしたいが、Prism7.2+ReactivePropertyのXAML環境下で適切に動作するConverterをどうしても作り込めなかった.
+        public ReactiveProperty<string> SelectedPlayerRace { get; } = new ReactiveProperty<string>(((int)RaceType.Human).ToString());
+
         public ReactiveProperty<string> SelectedPlayerPersonality { get; } = new ReactiveProperty<string>(((int)PersonalityType.Ordinary).ToString());
 
         public ReactiveProperty<string> SelectedPlayerClass { get; } = new ReactiveProperty<string>(((int)ClassType.Warrior).ToString());
@@ -72,6 +80,7 @@ namespace DiceRollExperiment.ViewModels
 
         public void AddCompositeDisposable()
         {
+            this.disposable.Add(this.SelectedPlayerRace);
             this.disposable.Add(this.SelectedPlayerPersonality);
             this.disposable.Add(this.SelectedPlayerClass);
             this.disposable.Add(this.PlayerDescriptionLabel);
@@ -81,18 +90,28 @@ namespace DiceRollExperiment.ViewModels
             this.disposable.Add(this.ElapsedTime);
         }
 
+        private void UpdateRace(string x)
+        {
+            var raceType = this.playerRace.GetPlayerRace(x);
+            var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(raceType, personalityType, classType);
+        }
+
         private void UpdatePersonality(string x)
         {
-            var playerPersonality = this.playerPersonality.GetPlayerPersonality(x);
-            var playerClass = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
-            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(playerPersonality, playerClass);
+            var raceType = this.playerRace.GetPlayerRace(this.SelectedPlayerRace.Value);
+            var personalityType = this.playerPersonality.GetPlayerPersonality(x);
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(raceType, personalityType, classType);
         }
 
         private void UpdateClass(string x)
         {
-            var playerPersonality = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
-            var playerClass = this.playerClass.GetPlayerClass(x);
-            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(playerPersonality, playerClass);
+            var raceType = this.playerRace.GetPlayerRace(this.SelectedPlayerRace.Value);
+            var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
+            var classType = this.playerClass.GetPlayerClass(x);
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(raceType, personalityType, classType);
         }
 
 
