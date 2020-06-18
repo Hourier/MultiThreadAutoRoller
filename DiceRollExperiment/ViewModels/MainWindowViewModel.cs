@@ -5,7 +5,6 @@ using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -153,8 +152,8 @@ namespace DiceRollExperiment.ViewModels
             var raceType = this.playerRace.GetPlayerRace(this.SelectedPlayerRace.Value);
             var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
             var classType = this.playerClass.GetPlayerClass(x);
-            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
             this.UpdateRealms();
+            this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
         }
 
         private void UpdateRealms()
@@ -199,6 +198,11 @@ namespace DiceRollExperiment.ViewModels
 
             var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
             var firstRealm = this.playerRealm.GetRealms(classType, true).Select(x => x.Key).ToList()[int.Parse(selectedFirstRealm)];
+            if (this.UpdateMageRealm(classType, firstRealm) || this.UpdatePriestRealm(classType, firstRealm))
+            {
+                return;
+            }
+
             this.SelectedPlayerRealmSecond.Value = "0";
         }
 
@@ -213,7 +217,58 @@ namespace DiceRollExperiment.ViewModels
             var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
             var firstRealm = this.playerRealm.GetRealms(classType, true).Select(x => x.Key).ToList()[int.Parse(selectedFirstRealm)];
             this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
+            if (this.UpdateMageRealm(classType, firstRealm) || this.UpdatePriestRealm(classType, firstRealm))
+            {
+                return;
+            }
+
             this.SelectedPlayerRealmSecond.Value = "0";
+        }
+
+        private bool UpdateMageRealm(ClassType classType, RealmType firstRealm)
+        {
+            if (classType != ClassType.Mage)
+            {
+                return false;
+            }
+
+            // 生命の時は仙術を強制的に選択させる.
+            if (firstRealm == RealmType.Life)
+            {
+                this.SelectedPlayerRealmSecond.Value = "1";
+                return true;
+            }
+
+            // 仙術の時は生命にしたいのだが、どうしてもコンボボックスが消滅するバグが起きたので仕方なくカオスにする.
+            if (firstRealm == RealmType.Sorcery)
+            {
+                this.SelectedPlayerRealmSecond.Value = "2";
+                return true;
+            }
+
+            // それ以外は第2領域のデフォルト値を生命にする.
+            this.SelectedPlayerRealmSecond.Value = "0";
+            return true;
+        }
+
+        private bool UpdatePriestRealm(ClassType classType, RealmType firstRealm)
+        {
+            if (classType != ClassType.Priest)
+            {
+                return false;
+            }
+
+            // 生命の時は仙術を強制的に選択させる.
+            // 暗黒の時も仙術になってしまうがどうしようもないので放置する.
+            if (firstRealm == RealmType.Life)
+            {
+                this.SelectedPlayerRealmSecond.Value = "1";
+                return true;
+            }
+
+            // それ以外は第2領域のデフォルト値を生命にする.
+            this.SelectedPlayerRealmSecond.Value = "0";
+            return true;
         }
 
         private void UpdateRealmSecond()

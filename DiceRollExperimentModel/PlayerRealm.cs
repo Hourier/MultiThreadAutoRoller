@@ -36,6 +36,8 @@ namespace DiceRollExperimentModel
         Kenjutsu = 12,
         [Display(Name = "呪術")]
         Hex = 13,
+        [Display(Name = "呪術以外")]
+        ExceptHex = 14,
     }
 
     public class PlayerRealm
@@ -54,6 +56,7 @@ namespace DiceRollExperimentModel
         private const string realmSong = "歌集";
         private const string realmKenjutsu = "武芸";
         private const string realmHex = "呪術";
+        private const string realmExceptHex = "呪術以外";
         private readonly Dictionary<RealmType, string> mageRealmMap = new Dictionary<RealmType, string>();
         private readonly Dictionary<RealmType, string> priestRealmMapFirst = new Dictionary<RealmType, string>();
         private readonly Dictionary<RealmType, string> priestRealmMapSecond = new Dictionary<RealmType, string>();
@@ -72,6 +75,7 @@ namespace DiceRollExperimentModel
         private readonly Dictionary<RealmType, string> bardRealmMap = new Dictionary<RealmType, string>();
         private readonly Dictionary<RealmType, string> samuraiRealmMap = new Dictionary<RealmType, string>();
         private readonly Dictionary<RealmType, string> warriorRealmMap = new Dictionary<RealmType, string>();
+        private readonly Dictionary<RealmType, string> exceptHexMap = new Dictionary<RealmType, string>();
 
         public PlayerRealm()
         {
@@ -163,6 +167,8 @@ namespace DiceRollExperimentModel
             this.samuraiRealmMap.Add(RealmType.Kenjutsu, realmKenjutsu);
 
             this.warriorRealmMap.Add(RealmType.None, realmNone);
+
+            this.exceptHexMap.Add(RealmType.ExceptHex, realmExceptHex);
         }
 
         public bool HasFirstRealm(ClassType playerClass)
@@ -184,6 +190,9 @@ namespace DiceRollExperimentModel
                 case ClassType.Bard:
                 case ClassType.Samurai:
                     return true;
+                case ClassType.RedMage:
+                case ClassType.Sorcerer:
+                    return false; // 選択の余地がないので敢えてfalse.
                 default:
                     return false;
             }
@@ -227,60 +236,18 @@ namespace DiceRollExperimentModel
                 ClassType.Ranger => isFirstRealm ? this.rangerRealmMapFirst : this.rangerRealmMapSecond,
                 ClassType.Paladin => isFirstRealm ? this.paladinRealmMap : this.warriorRealmMap,
                 ClassType.WarriorMage => isFirstRealm ? this.warriorMageRealmMapFirst : this.warriorMageRealmMapSecond,
-                ClassType.ChaosWarrior => isFirstRealm ? this.chaosWarriorMageRealmMap : this.warriorMageRealmMapSecond,
-                ClassType.Monk => isFirstRealm ? this.monkRealmMap : this.warriorMageRealmMapSecond,
-                ClassType.HighMage => isFirstRealm ? this.highMageRealmMap : this.warriorMageRealmMapSecond,
-                ClassType.Tourist => isFirstRealm ? this.touristRealmMap : this.warriorMageRealmMapSecond,
-                ClassType.BeastMaster => isFirstRealm ? this.beastMasterRealmMap : this.warriorMageRealmMapSecond,
-                ClassType.ForceTrainer => isFirstRealm ? this.forceTrainerRealmMap : this.warriorMageRealmMapSecond,
-                ClassType.Bard => isFirstRealm ? this.bardRealmMap : this.warriorMageRealmMapSecond,
-                ClassType.Samurai => isFirstRealm ? this.samuraiRealmMap : this.warriorMageRealmMapSecond,
+                ClassType.ChaosWarrior => isFirstRealm ? this.chaosWarriorMageRealmMap : this.warriorRealmMap,
+                ClassType.Monk => isFirstRealm ? this.monkRealmMap : this.warriorRealmMap,
+                ClassType.HighMage => isFirstRealm ? this.highMageRealmMap : this.warriorRealmMap,
+                ClassType.Tourist => isFirstRealm ? this.touristRealmMap : this.warriorRealmMap,
+                ClassType.BeastMaster => isFirstRealm ? this.beastMasterRealmMap : this.warriorRealmMap,
+                ClassType.ForceTrainer => isFirstRealm ? this.forceTrainerRealmMap : this.warriorRealmMap,
+                ClassType.Bard => isFirstRealm ? this.bardRealmMap : this.warriorRealmMap,
+                ClassType.Samurai => isFirstRealm ? this.samuraiRealmMap : this.warriorRealmMap,
+                ClassType.RedMage => this.exceptHexMap,
+                ClassType.Sorcerer => this.exceptHexMap,
                 _ => this.warriorRealmMap,
             };
-        }
-
-        public RealmType GetRealm(string value)
-        {
-            if (!int.TryParse(value, out var realmValue))
-            {
-                throw new ArgumentException(Resources.M_InvalidValue);
-            }
-
-            if (!Enum.IsDefined(typeof(ClassType), realmValue))
-            {
-                throw new ArgumentException(Resources.M_UndefinedValue);
-            }
-
-            return (RealmType)realmValue;
-        }
-
-        private readonly Dictionary<RealmType, string> realmMapSecond = new Dictionary<RealmType, string>();
-
-        // VMはToDictionary() で毎回違うオブジェクトが渡されると動作がおかしくなるか？ と思って一応追加してみた.
-        private Dictionary<RealmType, string> GetSecondRealms(ClassType playerClass, RealmType realmType)
-        {
-            this.realmMapSecond.Clear();
-            switch (playerClass)
-            {
-                case ClassType.Mage:
-                    foreach(var kvp in this.mageRealmMap.Where(x => x.Key != realmType))
-                    {
-                        this.realmMapSecond.Add(kvp.Key, kvp.Value);
-                    }
-
-                    return this.realmMapSecond;
-                case ClassType.Priest:
-                    foreach (var kvp in this.mageRealmMap.Where(x => x.Key != realmType))
-                    {
-                        this.realmMapSecond.Add(kvp.Key, kvp.Value);
-                    }
-
-                    return this.realmMapSecond;
-                default:
-                    this.realmMapSecond.Add(RealmType.None, realmNone);
-                    return this.realmMapSecond;
-            }          
-
         }
     }
 }
