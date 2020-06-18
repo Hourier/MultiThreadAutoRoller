@@ -6,14 +6,14 @@ namespace DiceRollExperimentModel
     public class DiceRoller : IDiceRoller
     {
         public event PropertyChangedEventHandler? PropertyChanged;
-        private const int MaxDiceNumber = 100000000;
+        private const int MaxDiceNumber = 200000000;
         private Random random = new Random();
 
         public DiceRoller()
         {
         }
 
-        public int DiceRollCount { get; private set; }
+        public ulong DiceRollCount { get; private set; }
 
         public int DiceRollResult { get; private set; }
 

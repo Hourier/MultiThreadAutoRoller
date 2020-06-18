@@ -5,7 +5,7 @@ namespace DiceRollExperimentModel
 {
     public interface IDiceRoller : INotifyPropertyChanged
     {
-        public int DiceRollCount { get; }
+        public ulong DiceRollCount { get; }
 
         public int DiceRollResult { get; }
 
