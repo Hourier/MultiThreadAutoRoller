@@ -21,7 +21,7 @@
                   ItemsSource="{Binding FirstRealmsComboBox.Value}" SelectedItem="{Binding FirstRealmsComboBox.Value, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerRealmFirst.Value}"
                   Validation.ErrorTemplate="{x:Null}" FontSize="16" IsEnabled="{Binding HasFirstRealm.Value}"/>
         <ComboBox HorizontalAlignment="Center" Margin="-150,100,0,0" VerticalAlignment="Top" Width="120"
-                  ItemsSource="{Binding SecondRealmsComboBox.Value}" SelectedItem="{Binding SecondRealmsComboBox.Value, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value"
+                  ItemsSource="{Binding SecondRealmsComboBox.Value}" SelectedItem="{Binding SecondRealmsComboBox.Value, Mode=TwoWay}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedIndex="{Binding SelectedPlayerRealmSecond.Value}"
                   Validation.ErrorTemplate="{x:Null}" FontSize="16" IsEnabled="{Binding HasSecondRealm.Value}"/>
         <Label Content="{Binding PlayerDescriptionLabel.Value}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0,150,0,0" VerticalAlignment="Top" Width="500" FontSize="20"/>
 

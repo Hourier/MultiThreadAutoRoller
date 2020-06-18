@@ -42,11 +42,10 @@ namespace DiceRollExperiment.ViewModels
             this.SelectedPlayerPersonality.Subscribe(x => this.UpdatePersonality(x));
             this.ClassesComboBox = this.playerClass.ClassMap;
             this.SelectedPlayerClass.Subscribe(x => this.UpdateClass(x));
-            this.FirstRealmsComboBox.Subscribe(_ => this.UpdateRealmFirst(true));
-            this.SecondRealmsComboBox.Subscribe(_ => this.UpdateRealmSecond(true));
-            this.SelectedPlayerRealmFirst.Subscribe(_ => this.UpdateRealmFirst(false));
-            this.SelectedPlayerRealmSecond.Subscribe(_ => this.UpdateRealmSecond(false));
-            // this.UpdateRealm();
+            this.FirstRealmsComboBox.Subscribe(_ => this.UpdateRealmsComboBoxFirst());
+            this.SecondRealmsComboBox.Subscribe(_ => this.UpdateRealmssComboBoxSecond());
+            this.SelectedPlayerRealmFirst.Subscribe(_ => this.UpdateRealmFirst());
+            this.SelectedPlayerRealmSecond.Subscribe(_ => this.UpdateRealmSecond());
         }
 
         public string Title
@@ -155,48 +154,70 @@ namespace DiceRollExperiment.ViewModels
             var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
             var classType = this.playerClass.GetPlayerClass(x);
             this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
-            this.UpdateRealmFirst(true);
+            this.UpdateRealms();
         }
 
-        private void UpdateRealmFirst(bool isClassChanged)
+        private void UpdateRealms()
         {
             var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
-            if (isClassChanged)
-            {
-                this.HasFirstRealm.Value = this.playerRealm.HasFirstRealm(classType);
-                this.FirstRealmsComboBox.Value = this.playerRealm.GetRealms(classType, true);
-                this.SelectedPlayerRealmFirst.Value = "0";
-            }
+            var firstRealms = this.playerRealm.GetRealms(classType, true);
+            this.FirstRealmsComboBox.Value = firstRealms;
+            this.SelectedPlayerRealmFirst.Value = "0";
+            var hasFirstRealm = this.playerRealm.HasFirstRealm(classType);
+            var isFirstRealmFixed = this.playerRealm.IsFirstRealmFixed(classType);
+            this.HasFirstRealm.Value = hasFirstRealm && !isFirstRealmFixed;
 
-            if (!this.playerRealm.IsFirstRealmFixed(classType))
-            {
-                return;
-            }
-
-            this.HasFirstRealm.Value = false;
-            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false);
-        }
-
-        private void UpdateRealmSecond(bool isClassChanged)
-        {
-            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
-            if (!this.HasSecondRealm.Value)
-            {
-                Debug.WriteLine(this.SelectedPlayerRealmFirst.Value);
-                this.HasSecondRealm.Value = this.playerRealm.HasSecondRealm(classType);
-                return;
-            }
-
-            var firstRealm = this.FirstRealmsComboBox.Value.Select(x => x.Key).ToList()[int.Parse(this.SelectedPlayerRealmFirst.Value)];
+            var firstRealm = firstRealms.Select(x => x.Key).First();
             this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
-            this.SelectedPlayerRealmSecond.Value = ((int)this.SecondRealmsComboBox.Value.First().Key).ToString();
-            this.UpdateDescriptionOnRealmChanged();
-
+            this.SelectedPlayerRealmSecond.Value = "0";
+            this.HasSecondRealm.Value = this.playerRealm.HasSecondRealm(classType);
         }
 
-        private void UpdateDescriptionOnRealmChanged()
+        private void UpdateRealmsComboBoxFirst()
         {
-            Debug.Write("Realm was updated");
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            var firstRealms = this.playerRealm.GetRealms(classType, true);
+            this.FirstRealmsComboBox.Value = firstRealms;
+            this.SelectedPlayerRealmFirst.Value = "0";
+            var hasFirstRealm = this.playerRealm.HasFirstRealm(classType);
+            var isFirstRealmFixed = this.playerRealm.IsFirstRealmFixed(classType);
+            this.HasFirstRealm.Value = hasFirstRealm && !isFirstRealmFixed;
+
+            var firstRealm = firstRealms.Select(x => x.Key).First();
+            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
+            this.SelectedPlayerRealmSecond.Value = "0";
+            this.HasSecondRealm.Value = this.playerRealm.HasSecondRealm(classType);
+        }
+
+        private void UpdateRealmssComboBoxSecond()
+        {
+            var selectedFirstRealm = this.SelectedPlayerRealmFirst.Value;
+            if ("-1".Equals(selectedFirstRealm))
+            {
+                return;
+            }
+
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            var firstRealm = this.playerRealm.GetRealms(classType, true).Select(x => x.Key).ToList()[int.Parse(selectedFirstRealm)];
+            this.SelectedPlayerRealmSecond.Value = "0";
+        }
+
+        private void UpdateRealmFirst()
+        {
+            var selectedFirstRealm = this.SelectedPlayerRealmFirst.Value;
+            if ("-1".Equals(selectedFirstRealm))
+            {
+                return;
+            }
+
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            var firstRealm = this.playerRealm.GetRealms(classType, true).Select(x => x.Key).ToList()[int.Parse(selectedFirstRealm)];
+            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
+            this.SelectedPlayerRealmSecond.Value = "0";
+        }
+
+        private void UpdateRealmSecond()
+        {
         }
 
         private void ExecuteDiceRoll()
