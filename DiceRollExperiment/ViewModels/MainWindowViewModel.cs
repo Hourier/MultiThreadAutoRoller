@@ -5,6 +5,8 @@ using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -29,7 +31,6 @@ namespace DiceRollExperiment.ViewModels
         {
             this.eventAggregator = eventAggregator;
             this.AddCompositeDisposable();
-            this.PlayerDescriptionLabel.Value = "あなたは……";
             this.DiceRollCommand.Subscribe(() => this.ExecuteDiceRoll());
 
             this.playerDescription = new PlayerDescription(this.playerSex, this.playerRace, this.playerPersonality, this.playerClass);
@@ -41,7 +42,11 @@ namespace DiceRollExperiment.ViewModels
             this.SelectedPlayerPersonality.Subscribe(x => this.UpdatePersonality(x));
             this.ClassesComboBox = this.playerClass.ClassMap;
             this.SelectedPlayerClass.Subscribe(x => this.UpdateClass(x));
-            this.UpdateRealm();
+            this.FirstRealmsComboBox.Subscribe(_ => this.UpdateRealmFirst(true));
+            this.SecondRealmsComboBox.Subscribe(_ => this.UpdateRealmSecond(true));
+            this.SelectedPlayerRealmFirst.Subscribe(_ => this.UpdateRealmFirst(false));
+            this.SelectedPlayerRealmSecond.Subscribe(_ => this.UpdateRealmSecond(false));
+            // this.UpdateRealm();
         }
 
         public string Title
@@ -82,6 +87,8 @@ namespace DiceRollExperiment.ViewModels
         public ReactiveProperty<bool> HasSecondRealm { get; } = new ReactiveProperty<bool>();
 
         public ReactiveProperty<string> SelectedPlayerRealmFirst { get; } = new ReactiveProperty<string>();
+
+        public ReactiveProperty<string> SelectedPlayerRealmSecond { get; } = new ReactiveProperty<string>();
 
         public ReactiveProperty<string> PlayerDescriptionLabel { get; } = new ReactiveProperty<string>();
 
@@ -148,16 +155,48 @@ namespace DiceRollExperiment.ViewModels
             var personalityType = this.playerPersonality.GetPlayerPersonality(this.SelectedPlayerPersonality.Value);
             var classType = this.playerClass.GetPlayerClass(x);
             this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
-            this.UpdateRealm();
+            this.UpdateRealmFirst(true);
         }
 
-        private void UpdateRealm()
+        private void UpdateRealmFirst(bool isClassChanged)
         {
             var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
-            this.HasFirstRealm.Value = this.playerRealm.HasFirstRealm(classType);
-            this.FirstRealmsComboBox.Value = this.playerRealm.GetRealm(classType, true);
-            this.HasSecondRealm.Value = this.playerRealm.HasSecondRealm(classType);
-            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealm(classType, false);
+            if (isClassChanged)
+            {
+                this.HasFirstRealm.Value = this.playerRealm.HasFirstRealm(classType);
+                this.FirstRealmsComboBox.Value = this.playerRealm.GetRealms(classType, true);
+                this.SelectedPlayerRealmFirst.Value = "0";
+            }
+
+            if (!this.playerRealm.IsFirstRealmFixed(classType))
+            {
+                return;
+            }
+
+            this.HasFirstRealm.Value = false;
+            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false);
+        }
+
+        private void UpdateRealmSecond(bool isClassChanged)
+        {
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            if (!this.HasSecondRealm.Value)
+            {
+                Debug.WriteLine(this.SelectedPlayerRealmFirst.Value);
+                this.HasSecondRealm.Value = this.playerRealm.HasSecondRealm(classType);
+                return;
+            }
+
+            var firstRealm = this.FirstRealmsComboBox.Value.Select(x => x.Key).ToList()[int.Parse(this.SelectedPlayerRealmFirst.Value)];
+            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
+            this.SelectedPlayerRealmSecond.Value = ((int)this.SecondRealmsComboBox.Value.First().Key).ToString();
+            this.UpdateDescriptionOnRealmChanged();
+
+        }
+
+        private void UpdateDescriptionOnRealmChanged()
+        {
+            Debug.Write("Realm was updated");
         }
 
         private void ExecuteDiceRoll()
