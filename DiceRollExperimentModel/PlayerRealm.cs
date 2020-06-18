@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 
 namespace DiceRollExperimentModel
 {
@@ -57,6 +58,7 @@ namespace DiceRollExperimentModel
         private const string realmKenjutsu = "武芸";
         private const string realmHex = "呪術";
         private const string realmExceptHex = "呪術以外";
+        private readonly Dictionary<RealmType, string> allRealmsMap = new Dictionary<RealmType, string>();
         private readonly Dictionary<RealmType, string> mageRealmMap = new Dictionary<RealmType, string>();
         private readonly Dictionary<RealmType, string> priestRealmMapFirst = new Dictionary<RealmType, string>();
         private readonly Dictionary<RealmType, string> priestRealmMapSecond = new Dictionary<RealmType, string>();
@@ -79,6 +81,21 @@ namespace DiceRollExperimentModel
 
         public PlayerRealm()
         {
+            this.allRealmsMap.Add(RealmType.Life, realmLife);
+            this.allRealmsMap.Add(RealmType.Sorcery, realmSorcery);
+            this.allRealmsMap.Add(RealmType.Nature, realmNature);
+            this.allRealmsMap.Add(RealmType.Chaos, realmChaos);
+            this.allRealmsMap.Add(RealmType.Death, realmDeath);
+            this.allRealmsMap.Add(RealmType.Trump, realmTrump);
+            this.allRealmsMap.Add(RealmType.Arcane, realmArcane);
+            this.allRealmsMap.Add(RealmType.Craft, realmCraft);
+            this.allRealmsMap.Add(RealmType.Demon, realmDemon);
+            this.allRealmsMap.Add(RealmType.Crusade, realmCrusade);
+            this.allRealmsMap.Add(RealmType.Song, realmSong);
+            this.allRealmsMap.Add(RealmType.Kenjutsu, realmKenjutsu);
+            this.allRealmsMap.Add(RealmType.Hex, realmHex);
+            this.allRealmsMap.Add(RealmType.ExceptHex, realmExceptHex);
+
             this.mageRealmMap.Add(RealmType.Life, realmLife);
             this.mageRealmMap.Add(RealmType.Sorcery, realmSorcery);
             this.mageRealmMap.Add(RealmType.Nature, realmNature);
@@ -200,12 +217,14 @@ namespace DiceRollExperimentModel
 
         public bool IsFirstRealmFixed(ClassType playerClass)
         {
-            switch(playerClass)
+            switch (playerClass)
             {
                 case ClassType.Ranger:
                 case ClassType.WarriorMage:
                 case ClassType.Tourist:
                 case ClassType.BeastMaster:
+                case ClassType.Bard:
+                case ClassType.Samurai:
                     return true;
                 default:
                     return false;
@@ -226,12 +245,12 @@ namespace DiceRollExperimentModel
             }
         }
 
-        public IReadOnlyDictionary<RealmType, string> GetRealms(ClassType playerClass, bool isFirstRealm, RealmType realmType = RealmType.None)
+        public IReadOnlyDictionary<RealmType, string> GetRealms(ClassType classType, bool isFirstRealm, RealmType firstRealm = RealmType.None)
         {
-            return playerClass switch
+            return classType switch
             {
-                ClassType.Mage => isFirstRealm ? this.mageRealmMap : this.mageRealmMap.Where(x => x.Key != realmType).ToDictionary(x => x.Key, x => x.Value),
-                ClassType.Priest => isFirstRealm ? this.priestRealmMapFirst : this.priestRealmMapSecond.Where(x => x.Key != realmType).ToDictionary(x => x.Key, x => x.Value),
+                ClassType.Mage => isFirstRealm ? this.mageRealmMap : this.mageRealmMap.Where(x => x.Key != firstRealm).ToDictionary(x => x.Key, x => x.Value),
+                ClassType.Priest => isFirstRealm ? this.priestRealmMapFirst : this.priestRealmMapSecond.Where(x => x.Key != firstRealm).ToDictionary(x => x.Key, x => x.Value),
                 ClassType.Rogue => isFirstRealm ? this.rogueRealmMap : this.warriorRealmMap,
                 ClassType.Ranger => isFirstRealm ? this.rangerRealmMapFirst : this.rangerRealmMapSecond,
                 ClassType.Paladin => isFirstRealm ? this.paladinRealmMap : this.warriorRealmMap,
@@ -248,6 +267,51 @@ namespace DiceRollExperimentModel
                 ClassType.Sorcerer => this.exceptHexMap,
                 _ => this.warriorRealmMap,
             };
+        }
+
+        public string GetRealmDescription(ClassType classType, RealmType firstRealm, RealmType secondRealm)
+        {
+            var builder = new StringBuilder();
+            builder.Append("あなた");
+            if ((classType != ClassType.RedMage) && (classType != ClassType.Sorcerer) && !this.HasFirstRealm(classType))
+            {
+                builder.Append("は魔法が使えません");
+                return builder.ToString();
+            }
+
+            builder.Append("の使える魔法領域は");
+            switch (classType)
+            {
+                case ClassType.Mage:
+                case ClassType.Priest:
+                case ClassType.Ranger:
+                case ClassType.WarriorMage:
+                    builder.Append(this.allRealmsMap[firstRealm]);
+                    builder.Append("と");
+                    builder.Append(this.allRealmsMap[secondRealm]);
+                    builder.Append("です");
+                    return builder.ToString();
+                case ClassType.Rogue:
+                case ClassType.Paladin:
+                case ClassType.ChaosWarrior:
+                case ClassType.Monk:
+                case ClassType.HighMage:
+                case ClassType.Tourist:
+                case ClassType.BeastMaster:
+                case ClassType.ForceTrainer:
+                case ClassType.Bard:
+                case ClassType.Samurai:
+                    builder.Append(this.allRealmsMap[firstRealm]);
+                    builder.Append("です");
+                    return builder.ToString();
+                case ClassType.RedMage:
+                case ClassType.Sorcerer:
+                    builder.Append(this.allRealmsMap[firstRealm]);
+                    builder.Append("の全てです");
+                    return builder.ToString();
+            }
+
+            return builder.ToString();
         }
     }
 }

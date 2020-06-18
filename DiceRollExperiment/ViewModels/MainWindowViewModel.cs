@@ -90,6 +90,8 @@ namespace DiceRollExperiment.ViewModels
 
         public ReactiveProperty<string> PlayerDescriptionLabel { get; } = new ReactiveProperty<string>();
 
+        public ReactiveProperty<string> RealmDescriptionLabel { get; } = new ReactiveProperty<string>();
+
         public ReactiveCommand DisplayDescription { get; } = new ReactiveCommand();
 
         public ReactiveCommand DiceRollCommand { get; } = new ReactiveCommand();
@@ -113,6 +115,7 @@ namespace DiceRollExperiment.ViewModels
             this.disposable.Add(this.HasSecondRealm);
             this.disposable.Add(this.SelectedPlayerRealmFirst);
             this.disposable.Add(this.PlayerDescriptionLabel);
+            this.disposable.Add(this.RealmDescriptionLabel);
             this.disposable.Add(this.DisplayDescription);
             this.disposable.Add(this.DiceRollCommand);
             this.disposable.Add(this.DiceRollCount);
@@ -154,6 +157,7 @@ namespace DiceRollExperiment.ViewModels
             var classType = this.playerClass.GetPlayerClass(x);
             this.UpdateRealms();
             this.PlayerDescriptionLabel.Value = this.playerDescription.GetDescription(sexType, raceType, personalityType, classType);
+            this.UpdateRealmDescription();
         }
 
         private void UpdateRealms()
@@ -223,7 +227,10 @@ namespace DiceRollExperiment.ViewModels
             }
 
             this.SelectedPlayerRealmSecond.Value = "0";
+            this.UpdateRealmDescription();
         }
+
+        private void UpdateRealmSecond() => this.UpdateRealmDescription();
 
         private bool UpdateMageRealm(ClassType classType, RealmType firstRealm)
         {
@@ -260,6 +267,9 @@ namespace DiceRollExperiment.ViewModels
 
             // 生命の時は仙術を強制的に選択させる.
             // 暗黒の時も仙術になってしまうがどうしようもないので放置する.
+            // メイジで生命以外を選択し、その後プリーストを選択するとコンボボックスが空になる……
+            // 逆は問題なし。一旦暗黒などを選択して生命に戻しても問題なし.
+            // 意味不明なので一旦放置.
             if (firstRealm == RealmType.Life)
             {
                 this.SelectedPlayerRealmSecond.Value = "1";
@@ -271,8 +281,24 @@ namespace DiceRollExperiment.ViewModels
             return true;
         }
 
-        private void UpdateRealmSecond()
+        private void UpdateRealmDescription()
         {
+            var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
+            var selectedFirstRealm = this.SelectedPlayerRealmFirst.Value;
+            if ("-1".Equals(selectedFirstRealm))
+            {
+                return;
+            }
+
+            var firstRealm = this.playerRealm.GetRealms(classType, true).Select(x => x.Key).ToList()[int.Parse(selectedFirstRealm)];
+            var selectedSecondRealm = this.SelectedPlayerRealmSecond.Value;
+            if ("-1".Equals(selectedSecondRealm))
+            {
+                return;
+            }
+
+            var secondRealm = this.playerRealm.GetRealms(classType, false, firstRealm).Select(x => x.Key).ToList()[int.Parse(selectedSecondRealm)];
+            this.RealmDescriptionLabel.Value = this.playerRealm.GetRealmDescription(classType, firstRealm, secondRealm);
         }
 
         private void ExecuteDiceRoll()
