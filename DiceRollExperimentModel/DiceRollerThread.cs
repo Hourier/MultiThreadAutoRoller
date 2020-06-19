@@ -90,6 +90,8 @@ namespace DiceRollExperimentModel
             this.ElapsedTime = TimeSpan.Zero;
         }
 
+        // 明らかにpropertyNameではないのだが代替で使う.
+        // より良い方法があれば差し替えたい.
         private void OnTimerElapsed()
         {
             var builder = new StringBuilder();

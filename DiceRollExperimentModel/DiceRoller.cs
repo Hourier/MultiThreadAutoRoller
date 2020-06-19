@@ -15,13 +15,6 @@ namespace DiceRollExperimentModel
 
         public DiceRoller()
         {
-        }
-
-        public int DiceRollResult { get; private set; }
-
-        public async Task<ulong> StartRoll()
-        {
-            this.diceRollerThreads.Clear();
             var cpuThreads = Environment.ProcessorCount;
             for (var i = 0; i < cpuThreads; i++)
             {
@@ -32,7 +25,12 @@ namespace DiceRollExperimentModel
                     diceRollerThread.PropertyChanged += this.OnTimerElapsed;
                 }
             }
+        }
 
+        public int DiceRollResult { get; private set; }
+
+        public async Task<ulong> StartRoll()
+        {
             var tokenSource = new CancellationTokenSource();
             var cancellationToken = tokenSource.Token;
             var tasks = new List<Task<ulong>>();
@@ -67,11 +65,11 @@ namespace DiceRollExperimentModel
             var diceRollResult = this.diceRollerThreads.Where(x => x.DiceRollResult == 0).FirstOrDefault();
             if ((diceRollResult == null) || (diceRollResult == default))
             {
-                throw new Exception("Unknown error!");
+                throw new Exception(Resources.M_UnknownError);
             }
 
             var elapsedTime = this.diceRollerThreads.First().ElapsedTime;
-            var rollsPerSecond = diceRollCount / (ulong)(elapsedTime.TotalMilliseconds / 1000);
+            var rollsPerSecond = elapsedTime.TotalMilliseconds < 1 ? 0 : diceRollCount / (ulong)(elapsedTime.TotalMilliseconds / 1000);
             return (diceRollCount, diceRollResult.DiceRollResult, elapsedTime, rollsPerSecond);
         }
 

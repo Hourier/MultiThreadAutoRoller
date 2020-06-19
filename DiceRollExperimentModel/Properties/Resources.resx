@@ -126,4 +126,7 @@
   <data name="M_UndefinedValue" xml:space="preserve">
     <value>Undefined value!</value>
   </data>
+  <data name="M_UnknownError" xml:space="preserve">
+    <value>Unknown error!</value>
+  </data>
 </root>

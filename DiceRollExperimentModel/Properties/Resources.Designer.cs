@@ -86,5 +86,14 @@ namespace DiceRollExperimentModel.Properties {
                 return ResourceManager.GetString("M_UndefinedValue", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Unknown error! に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string M_UnknownError {
+            get {
+                return ResourceManager.GetString("M_UnknownError", resourceCulture);
+            }
+        }
     }
 }

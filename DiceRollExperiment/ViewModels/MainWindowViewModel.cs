@@ -23,9 +23,9 @@ namespace DiceRollExperiment.ViewModels
         private readonly PlayerPersonality playerPersonality = new PlayerPersonality();
         private readonly PlayerClass playerClass = new PlayerClass();
         private readonly PlayerRealm playerRealm = new PlayerRealm();
+        private readonly CompositeDisposable disposable = new CompositeDisposable();
         private bool isButtonPushedFirst;
         private bool hasFinalResultGotten;
-        private CompositeDisposable disposable = new CompositeDisposable();
 
         public MainWindowViewModel(IEventAggregator eventAggregator)
         {
@@ -169,15 +169,15 @@ namespace DiceRollExperiment.ViewModels
             var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
             var firstRealms = this.playerRealm.GetRealms(classType, true);
             this.FirstRealmsComboBox.Value = firstRealms;
-            this.SelectedPlayerRealmFirst.Value = "0";
+
+            // メイジで生命以外を選んだ状態で職業をプリーストに切り替えると第2領域のコンボボックスが空欄になるバグの解消.
+            // メイジ側の初期値が生命だと、プリースト側では暗黒になってしまうが、制限事項とする.
+            // そして今気付いたが、暗黒パラディンからプリーストに切り替えると空欄バグが起きる……
+            this.SelectedPlayerRealmFirst.Value = classType == ClassType.Priest ? "1" : "0";
             var hasFirstRealm = this.playerRealm.HasFirstRealm(classType);
             var isFirstRealmFixed = this.playerRealm.IsFirstRealmFixed(classType);
             this.HasFirstRealm.Value = hasFirstRealm && !isFirstRealmFixed;
-
-            var firstRealm = firstRealms.Select(x => x.Key).First();
-            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
-            this.SelectedPlayerRealmSecond.Value = "0";
-            this.HasSecondRealm.Value = this.playerRealm.HasSecondRealm(classType);
+            this.SelectSecondRealm(classType);
         }
 
         private void UpdateRealmsComboBoxFirst()
@@ -189,7 +189,12 @@ namespace DiceRollExperiment.ViewModels
             var hasFirstRealm = this.playerRealm.HasFirstRealm(classType);
             var isFirstRealmFixed = this.playerRealm.IsFirstRealmFixed(classType);
             this.HasFirstRealm.Value = hasFirstRealm && !isFirstRealmFixed;
+            this.SelectSecondRealm(classType);
+        }
 
+        private void SelectSecondRealm(ClassType classType)
+        {
+            var firstRealms = this.playerRealm.GetRealms(classType, true);
             var firstRealm = firstRealms.Select(x => x.Key).First();
             this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
             this.SelectedPlayerRealmSecond.Value = "0";
@@ -271,9 +276,6 @@ namespace DiceRollExperiment.ViewModels
 
             // 生命の時は仙術を強制的に選択させる.
             // 暗黒の時も仙術になってしまうがどうしようもないので放置する.
-            // メイジで生命以外を選択し、その後プリーストを選択するとコンボボックスが空になる……
-            // 逆は問題なし。一旦暗黒などを選択して生命に戻しても問題なし.
-            // 意味不明なので一旦放置.
             if (firstRealm == RealmType.Life)
             {
                 this.SelectedPlayerRealmSecond.Value = "1";
