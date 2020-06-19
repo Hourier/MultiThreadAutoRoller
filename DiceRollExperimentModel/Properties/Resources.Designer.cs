@@ -61,6 +61,15 @@ namespace DiceRollExperimentModel.Properties {
         }
         
         /// <summary>
+        ///   Finished に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string M_Finished {
+            get {
+                return ResourceManager.GetString("M_Finished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Invalid value! に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string M_InvalidValue {

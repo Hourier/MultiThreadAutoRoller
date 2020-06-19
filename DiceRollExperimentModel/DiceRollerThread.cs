@@ -10,7 +10,7 @@ namespace DiceRollExperimentModel
 {
     internal class DiceRollerThread : INotifyPropertyChanged
     {
-        private const int MaxDiceNumber = 200000000;
+        private const int MaxDiceNumber = int.MaxValue;
         private readonly Random random;
         private readonly int threadNumber;
 
@@ -31,8 +31,6 @@ namespace DiceRollExperimentModel
         public int DiceRollResult { get; private set; }
 
         public TimeSpan ElapsedTime { get; private set; }
-
-        public ulong RollsPerSecond { get; private set; }
 
         internal ulong RunDiceRoll(DateTime startTime, CancellationToken cancellationToken)
         {
@@ -74,15 +72,15 @@ namespace DiceRollExperimentModel
             return timeCount;
         }
 
-        internal (ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime, ulong rollsPerSecond) GetResult(string message)
+        internal (ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime) GetResult(string message)
         {
             var messages = message.Split(',').ToList();
             if (messages.Count() != 5)
             {
-                return (0, 0, TimeSpan.Zero, 0);
+                return (0, 0, TimeSpan.Zero);
             }
 
-            return (ulong.Parse(messages[1]), int.Parse(messages[2]), TimeSpan.Parse(messages[3]), ulong.Parse(messages[4]));
+            return (ulong.Parse(messages[1]), int.Parse(messages[2]), TimeSpan.Parse(messages[3]));
         }
 
         private void ResetResult()
@@ -90,7 +88,6 @@ namespace DiceRollExperimentModel
             this.DiceRollCount = 0;
             this.DiceRollResult = 0;
             this.ElapsedTime = TimeSpan.Zero;
-            this.RollsPerSecond = 0;
         }
 
         private void OnTimerElapsed()
@@ -103,8 +100,7 @@ namespace DiceRollExperimentModel
             builder.Append(this.DiceRollResult);
             builder.Append(',');
             builder.Append(this.ElapsedTime);
-            builder.Append(',');
-            builder.Append(this.RollsPerSecond);
+            builder.Append(",0");
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(builder.ToString()));
         }
     }

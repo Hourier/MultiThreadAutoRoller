@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DiceRollExperimentModel.Properties;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -44,15 +45,15 @@ namespace DiceRollExperimentModel
 
             var endTask = await Task.WhenAny(tasks);
             tokenSource.Cancel();
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Finished"));
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(Resources.M_Finished));
             return endTask.Result;
         }
 
-        public (int threadNumber, ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime, ulong rollsPerSecond) GetResult(string message)
+        public (int threadNumber, ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime) GetResult(string message)
         {
             var threadNumber = int.Parse(message.Split(',').First());
-            var (diceRollCount, diceRollResult, elapsedTime, rollsPerSecond) = this.diceRollerThreads[threadNumber].GetResult(message);
-            return (threadNumber, diceRollCount, diceRollResult, elapsedTime, rollsPerSecond);
+            var (diceRollCount, diceRollResult, elapsedTime) = this.diceRollerThreads[threadNumber].GetResult(message);
+            return (threadNumber, diceRollCount, diceRollResult, elapsedTime);
         }
 
         public (ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime, ulong rollsPerSecond) GetFinalResult()
@@ -70,13 +71,10 @@ namespace DiceRollExperimentModel
             }
 
             var elapsedTime = this.diceRollerThreads.First().ElapsedTime;
-            var rollsPerSecond = diceRollCount / (ulong)Environment.ProcessorCount;
+            var rollsPerSecond = diceRollCount / (ulong)(elapsedTime.TotalMilliseconds / 1000);
             return (diceRollCount, diceRollResult.DiceRollResult, elapsedTime, rollsPerSecond);
         }
 
-        private void OnTimerElapsed(object sender, PropertyChangedEventArgs e)
-        {
-            this.PropertyChanged?.Invoke(this, e);
-        }
+        private void OnTimerElapsed(object sender, PropertyChangedEventArgs e) => this.PropertyChanged?.Invoke(this, e);
     }
 }

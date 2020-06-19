@@ -30,8 +30,10 @@
         <Label Content="Count" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-450,300,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
         <Label Content="Result" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="-150,300,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
         <Label Content="Elapsed time" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="150,300,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <Label Content="Rolls/sec" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="450,300,0,0" VerticalAlignment="Top" Width="135" FontSize="20"/>
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="-450,360,0,0" Text="{Binding DiceRollCount.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="-150,360,0,0" Text="{Binding DiceRollResult.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
         <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="150,360,0,0" Text="{Binding ElapsedTime.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
+        <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="450,360,0,0" Text="{Binding RollsPerSecond.Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="135" FontSize="20"/>
     </Grid>
 </Window>

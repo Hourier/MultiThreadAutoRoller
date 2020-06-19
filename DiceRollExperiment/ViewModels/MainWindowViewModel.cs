@@ -103,6 +103,8 @@ namespace DiceRollExperiment.ViewModels
 
         public ReactiveProperty<string> ElapsedTime { get; } = new ReactiveProperty<string>();
 
+        public ReactiveProperty<string> RollsPerSecond { get; } = new ReactiveProperty<string>();
+
         public void Dispose() => this.disposable.Dispose();
 
         public void AddCompositeDisposable()
@@ -121,6 +123,7 @@ namespace DiceRollExperiment.ViewModels
             this.disposable.Add(this.DiceRollCommand);
             this.disposable.Add(this.DiceRollCount);
             this.disposable.Add(this.ElapsedTime);
+            this.disposable.Add(this.RollsPerSecond);
         }
 
         private void UpdateSex(string x)
@@ -328,24 +331,28 @@ namespace DiceRollExperiment.ViewModels
                 return;
             }
 
-            var (threadNumber, diceRollCount, diceRollResult, elapsedTime, rollsPerSecond) = this.DiceRoller.GetResult(e.PropertyName);
+            var (threadNumber, diceRollCount, diceRollResult, elapsedTime) = this.DiceRoller.GetResult(e.PropertyName);
             if (threadNumber != 0)
             {
                 return;
             }
 
-            this.DiceRollCount.Value = diceRollCount.ToString("N0");
-            this.DiceRollResult.Value =diceRollResult.ToString("N0");
-            this.ElapsedTime.Value = elapsedTime.ToString(@"mm\:ss\.fff");
+            this.ShowUpdateRollResult(diceRollCount, diceRollResult, elapsedTime, 0);
         }
 
         private void ShowFinalDiceRollResult()
         {
             this.hasFinalResultGotten = true;
             var (diceRollCount, diceRollResult, elapsedTime, rollsPerSecond) = this.DiceRoller.GetFinalResult();
+            this.ShowUpdateRollResult(diceRollCount, diceRollResult, elapsedTime, rollsPerSecond);
+        }
+
+        private void ShowUpdateRollResult(ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime, ulong rollsPerSecond)
+        {
             this.DiceRollCount.Value = diceRollCount.ToString("N0");
             this.DiceRollResult.Value = diceRollResult.ToString("N0");
             this.ElapsedTime.Value = elapsedTime.ToString(@"mm\:ss\.fff");
+            this.RollsPerSecond.Value = rollsPerSecond == 0 ? string.Empty : rollsPerSecond.ToString("N0");
         }
     }
 }
