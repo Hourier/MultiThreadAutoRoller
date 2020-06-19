@@ -24,6 +24,7 @@ namespace DiceRollExperiment.ViewModels
         private readonly PlayerClass playerClass = new PlayerClass();
         private readonly PlayerRealm playerRealm = new PlayerRealm();
         private bool isButtonPushedFirst;
+        private bool hasFinalResultGotten;
         private CompositeDisposable disposable = new CompositeDisposable();
 
         public MainWindowViewModel(IEventAggregator eventAggregator)
@@ -309,20 +310,42 @@ namespace DiceRollExperiment.ViewModels
                 this.isButtonPushedFirst = true;
             }
 
+            this.hasFinalResultGotten = false;
             _ = Task.Run(() => this.DiceRoller.StartRoll());
         }
 
         // 敢えてToPropertyAsSynchronizedにしていない。UIの描画速度を抑えるため
         private void UpdateDiceRollResult(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(this.DiceRoller.DiceRollResult))
+            if ("Finished".Equals(e.PropertyName))
+            {
+                this.ShowFinalDiceRollResult();
+                return;
+            }
+
+            if (this.hasFinalResultGotten || !e.PropertyName.Contains(','))
             {
                 return;
             }
 
-            this.DiceRollCount.Value = this.DiceRoller.DiceRollCount.ToString("N0");
-            this.DiceRollResult.Value = this.DiceRoller.DiceRollResult.ToString("N0");
-            this.ElapsedTime.Value = this.DiceRoller.ElapsedTime.ToString(@"mm\:ss\.fff");
+            var (threadNumber, diceRollCount, diceRollResult, elapsedTime, rollsPerSecond) = this.DiceRoller.GetResult(e.PropertyName);
+            if (threadNumber != 0)
+            {
+                return;
+            }
+
+            this.DiceRollCount.Value = diceRollCount.ToString("N0");
+            this.DiceRollResult.Value =diceRollResult.ToString("N0");
+            this.ElapsedTime.Value = elapsedTime.ToString(@"mm\:ss\.fff");
+        }
+
+        private void ShowFinalDiceRollResult()
+        {
+            this.hasFinalResultGotten = true;
+            var (diceRollCount, diceRollResult, elapsedTime, rollsPerSecond) = this.DiceRoller.GetFinalResult();
+            this.DiceRollCount.Value = diceRollCount.ToString("N0");
+            this.DiceRollResult.Value = diceRollResult.ToString("N0");
+            this.ElapsedTime.Value = elapsedTime.ToString(@"mm\:ss\.fff");
         }
     }
 }

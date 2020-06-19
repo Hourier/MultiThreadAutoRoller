@@ -1,16 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace DiceRollExperimentModel
 {
     public interface IDiceRoller : INotifyPropertyChanged
     {
-        public ulong DiceRollCount { get; }
-
         public int DiceRollResult { get; }
 
-        public TimeSpan ElapsedTime { get; }
+        public Task<ulong> StartRoll();
 
-        public void StartRoll();
+        public (int threadNumber, ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime, ulong rollsPerSecond) GetResult(string message);
+
+        public (ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime, ulong rollsPerSecond) GetFinalResult();
     }
 }
