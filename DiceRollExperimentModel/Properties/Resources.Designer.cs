@@ -61,6 +61,15 @@ namespace DiceRollExperimentModel.Properties {
         }
         
         /// <summary>
+        ///   Finished に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string M_Finished {
+            get {
+                return ResourceManager.GetString("M_Finished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Invalid value! に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string M_InvalidValue {
@@ -75,6 +84,15 @@ namespace DiceRollExperimentModel.Properties {
         internal static string M_UndefinedValue {
             get {
                 return ResourceManager.GetString("M_UndefinedValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Unknown error! に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string M_UnknownError {
+            get {
+                return ResourceManager.GetString("M_UnknownError", resourceCulture);
             }
         }
     }

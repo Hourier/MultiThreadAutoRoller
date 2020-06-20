@@ -23,8 +23,9 @@ namespace DiceRollExperiment.ViewModels
         private readonly PlayerPersonality playerPersonality = new PlayerPersonality();
         private readonly PlayerClass playerClass = new PlayerClass();
         private readonly PlayerRealm playerRealm = new PlayerRealm();
+        private readonly CompositeDisposable disposable = new CompositeDisposable();
         private bool isButtonPushedFirst;
-        private CompositeDisposable disposable = new CompositeDisposable();
+        private bool hasFinalResultGotten;
 
         public MainWindowViewModel(IEventAggregator eventAggregator)
         {
@@ -102,6 +103,8 @@ namespace DiceRollExperiment.ViewModels
 
         public ReactiveProperty<string> ElapsedTime { get; } = new ReactiveProperty<string>();
 
+        public ReactiveProperty<string> RollsPerSecond { get; } = new ReactiveProperty<string>();
+
         public void Dispose() => this.disposable.Dispose();
 
         public void AddCompositeDisposable()
@@ -120,6 +123,7 @@ namespace DiceRollExperiment.ViewModels
             this.disposable.Add(this.DiceRollCommand);
             this.disposable.Add(this.DiceRollCount);
             this.disposable.Add(this.ElapsedTime);
+            this.disposable.Add(this.RollsPerSecond);
         }
 
         private void UpdateSex(string x)
@@ -165,15 +169,15 @@ namespace DiceRollExperiment.ViewModels
             var classType = this.playerClass.GetPlayerClass(this.SelectedPlayerClass.Value);
             var firstRealms = this.playerRealm.GetRealms(classType, true);
             this.FirstRealmsComboBox.Value = firstRealms;
-            this.SelectedPlayerRealmFirst.Value = "0";
+
+            // メイジで生命以外を選んだ状態で職業をプリーストに切り替えると第2領域のコンボボックスが空欄になるバグの解消.
+            // メイジ側の初期値が生命だと、プリースト側では暗黒になってしまうが、制限事項とする.
+            // そして今気付いたが、暗黒パラディンからプリーストに切り替えると空欄バグが起きる……
+            this.SelectedPlayerRealmFirst.Value = classType == ClassType.Priest ? "1" : "0";
             var hasFirstRealm = this.playerRealm.HasFirstRealm(classType);
             var isFirstRealmFixed = this.playerRealm.IsFirstRealmFixed(classType);
             this.HasFirstRealm.Value = hasFirstRealm && !isFirstRealmFixed;
-
-            var firstRealm = firstRealms.Select(x => x.Key).First();
-            this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
-            this.SelectedPlayerRealmSecond.Value = "0";
-            this.HasSecondRealm.Value = this.playerRealm.HasSecondRealm(classType);
+            this.SelectSecondRealm(classType);
         }
 
         private void UpdateRealmsComboBoxFirst()
@@ -185,7 +189,12 @@ namespace DiceRollExperiment.ViewModels
             var hasFirstRealm = this.playerRealm.HasFirstRealm(classType);
             var isFirstRealmFixed = this.playerRealm.IsFirstRealmFixed(classType);
             this.HasFirstRealm.Value = hasFirstRealm && !isFirstRealmFixed;
+            this.SelectSecondRealm(classType);
+        }
 
+        private void SelectSecondRealm(ClassType classType)
+        {
+            var firstRealms = this.playerRealm.GetRealms(classType, true);
             var firstRealm = firstRealms.Select(x => x.Key).First();
             this.SecondRealmsComboBox.Value = this.playerRealm.GetRealms(classType, false, firstRealm);
             this.SelectedPlayerRealmSecond.Value = "0";
@@ -267,9 +276,6 @@ namespace DiceRollExperiment.ViewModels
 
             // 生命の時は仙術を強制的に選択させる.
             // 暗黒の時も仙術になってしまうがどうしようもないので放置する.
-            // メイジで生命以外を選択し、その後プリーストを選択するとコンボボックスが空になる……
-            // 逆は問題なし。一旦暗黒などを選択して生命に戻しても問題なし.
-            // 意味不明なので一旦放置.
             if (firstRealm == RealmType.Life)
             {
                 this.SelectedPlayerRealmSecond.Value = "1";
@@ -309,20 +315,46 @@ namespace DiceRollExperiment.ViewModels
                 this.isButtonPushedFirst = true;
             }
 
+            this.hasFinalResultGotten = false;
             _ = Task.Run(() => this.DiceRoller.StartRoll());
         }
 
         // 敢えてToPropertyAsSynchronizedにしていない。UIの描画速度を抑えるため
         private void UpdateDiceRollResult(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(this.DiceRoller.DiceRollResult))
+            if ("Finished".Equals(e.PropertyName))
+            {
+                this.ShowFinalDiceRollResult();
+                return;
+            }
+
+            if (this.hasFinalResultGotten || !e.PropertyName.Contains(','))
             {
                 return;
             }
 
-            this.DiceRollCount.Value = this.DiceRoller.DiceRollCount.ToString("N0");
-            this.DiceRollResult.Value = this.DiceRoller.DiceRollResult.ToString("N0");
-            this.ElapsedTime.Value = this.DiceRoller.ElapsedTime.ToString(@"mm\:ss\.fff");
+            var (threadNumber, diceRollCount, diceRollResult, elapsedTime) = this.DiceRoller.GetResult(e.PropertyName);
+            if (threadNumber != 0)
+            {
+                return;
+            }
+
+            this.ShowUpdateRollResult(diceRollCount, diceRollResult, elapsedTime, 0);
+        }
+
+        private void ShowFinalDiceRollResult()
+        {
+            this.hasFinalResultGotten = true;
+            var (diceRollCount, diceRollResult, elapsedTime, rollsPerSecond) = this.DiceRoller.GetFinalResult();
+            this.ShowUpdateRollResult(diceRollCount, diceRollResult, elapsedTime, rollsPerSecond);
+        }
+
+        private void ShowUpdateRollResult(ulong diceRollCount, int diceRollResult, TimeSpan elapsedTime, ulong rollsPerSecond)
+        {
+            this.DiceRollCount.Value = diceRollCount.ToString("N0");
+            this.DiceRollResult.Value = diceRollResult.ToString("N0");
+            this.ElapsedTime.Value = elapsedTime.ToString(@"mm\:ss\.fff");
+            this.RollsPerSecond.Value = rollsPerSecond == 0 ? string.Empty : rollsPerSecond.ToString("N0");
         }
     }
 }
