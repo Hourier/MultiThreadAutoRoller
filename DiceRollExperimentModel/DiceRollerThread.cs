@@ -1,14 +1,12 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DiceRollExperimentModel
 {
-    internal class DiceRollerThread : INotifyPropertyChanged
+    internal class DiceRollerThread
     {
         private const int MaxDiceNumber = int.MaxValue;
         private readonly Random random;
@@ -24,13 +22,13 @@ namespace DiceRollExperimentModel
             this.random = new Random(seed);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event EventHandler<string>? OnCalculationFinished;
 
-        public ulong DiceRollCount { get; private set; }
+        internal ulong DiceRollCount { get; private set; }
 
-        public int DiceRollResult { get; private set; }
+        internal int DiceRollResult { get; private set; }
 
-        public TimeSpan ElapsedTime { get; private set; }
+        internal TimeSpan ElapsedTime { get; private set; }
 
         internal ulong RunDiceRoll(DateTime startTime, CancellationToken cancellationToken)
         {
@@ -90,8 +88,6 @@ namespace DiceRollExperimentModel
             this.ElapsedTime = TimeSpan.Zero;
         }
 
-        // 明らかにpropertyNameではないのだが代替で使う.
-        // より良い方法があれば差し替えたい.
         private void OnTimerElapsed()
         {
             var builder = new StringBuilder();
@@ -103,7 +99,7 @@ namespace DiceRollExperimentModel
             builder.Append(',');
             builder.Append(this.ElapsedTime);
             builder.Append(",0");
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(builder.ToString()));
+            this.OnCalculationFinished?.Invoke(this, builder.ToString());
         }
     }
 }

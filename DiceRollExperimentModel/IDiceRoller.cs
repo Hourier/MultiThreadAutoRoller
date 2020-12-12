@@ -1,11 +1,13 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace DiceRollExperimentModel
 {
-    public interface IDiceRoller : INotifyPropertyChanged
+    public interface IDiceRoller
     {
+        public event EventHandler<string>? OnCalculationFinished;
+
+        // TODO 使われていない
         public int DiceRollResult { get; }
 
         public Task<ulong> StartRoll();
