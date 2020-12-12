@@ -1,7 +1,6 @@
 ﻿using DiceRollExperimentModel.Properties;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,8 @@ namespace DiceRollExperimentModel
 {
     public class DiceRoller : IDiceRoller
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event EventHandler<string>? OnCalculationFinished;
+
         private readonly List<DiceRollerThread> diceRollerThreads = new List<DiceRollerThread>();
 
         public DiceRoller()
@@ -22,7 +22,7 @@ namespace DiceRollExperimentModel
                 this.diceRollerThreads.Add(diceRollerThread);
                 if (i == 0)
                 {
-                    diceRollerThread.PropertyChanged += this.OnTimerElapsed;
+                    diceRollerThread.OnCalculationFinished += this.OnTimerElapsed;
                 }
             }
         }
@@ -43,7 +43,7 @@ namespace DiceRollExperimentModel
 
             var endTask = await Task.WhenAny(tasks);
             tokenSource.Cancel();
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(Resources.M_Finished));
+            this.OnCalculationFinished?.Invoke(this, Resources.M_Finished);
             return endTask.Result;
         }
 
@@ -73,6 +73,6 @@ namespace DiceRollExperimentModel
             return (diceRollCount, diceRollResult.DiceRollResult, elapsedTime, rollsPerSecond);
         }
 
-        private void OnTimerElapsed(object sender, PropertyChangedEventArgs e) => this.PropertyChanged?.Invoke(this, e);
+        private void OnTimerElapsed(object? sender, string e) => this.OnCalculationFinished?.Invoke(this, e);
     }
 }

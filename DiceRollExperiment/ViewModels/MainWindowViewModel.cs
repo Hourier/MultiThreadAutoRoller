@@ -1,10 +1,10 @@
-﻿using DiceRollExperimentModel;
+﻿using DiceRollExperiment.Properties;
+using DiceRollExperimentModel;
 using Prism.Events;
 using Prism.Mvvm;
 using Reactive.Bindings;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -24,7 +24,7 @@ namespace DiceRollExperiment.ViewModels
         private readonly PlayerClass playerClass = new PlayerClass();
         private readonly PlayerRealm playerRealm = new PlayerRealm();
         private readonly CompositeDisposable disposable = new CompositeDisposable();
-        private bool isButtonPushedFirst;
+        private bool isFirstRoll = true;
         private bool hasFinalResultGotten;
 
         public MainWindowViewModel(IEventAggregator eventAggregator)
@@ -50,8 +50,8 @@ namespace DiceRollExperiment.ViewModels
 
         public string Title
         {
-            get { return title; }
-            set { this.SetProperty(ref this.title, value); }
+            get => this.title;
+            set => this.SetProperty(ref this.title, value);
         }
 
         // コンストラクタ内ではnull.
@@ -309,10 +309,10 @@ namespace DiceRollExperiment.ViewModels
 
         private void ExecuteDiceRoll()
         {
-            if (!this.isButtonPushedFirst)
+            if (this.isFirstRoll)
             {
-                this.DiceRoller.PropertyChanged += this.UpdateDiceRollResult;
-                this.isButtonPushedFirst = true;
+                this.DiceRoller.OnCalculationFinished += this.UpdateDiceRollResult;
+                this.isFirstRoll = false;
             }
 
             this.hasFinalResultGotten = false;
@@ -320,20 +320,20 @@ namespace DiceRollExperiment.ViewModels
         }
 
         // 敢えてToPropertyAsSynchronizedにしていない。UIの描画速度を抑えるため
-        private void UpdateDiceRollResult(object sender, PropertyChangedEventArgs e)
+        private void UpdateDiceRollResult(object sender, string e)
         {
-            if ("Finished".Equals(e.PropertyName))
+            if (e == Resources.M_Finished)
             {
                 this.ShowFinalDiceRollResult();
                 return;
             }
 
-            if (this.hasFinalResultGotten || !e.PropertyName.Contains(','))
+            if (this.hasFinalResultGotten || !e.Contains(','))
             {
                 return;
             }
 
-            var (threadNumber, diceRollCount, diceRollResult, elapsedTime) = this.DiceRoller.GetResult(e.PropertyName);
+            var (threadNumber, diceRollCount, diceRollResult, elapsedTime) = this.DiceRoller.GetResult(e);
             if (threadNumber != 0)
             {
                 return;
